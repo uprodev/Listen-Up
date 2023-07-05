@@ -79,4 +79,33 @@ function add_class_content ($string, $p_class = '', $h_class = '') {
 }
 
 
+add_filter('bcn_breadcrumb_title', 'my_breadcrumb_title_swapper', 3, 10);
+function my_breadcrumb_title_swapper($title, $type, $id)
+{
+    if(in_array('home', $type))
+    {
+        $title = __('Home', 'ListenUp');
+    }
+    return $title;
+}
+
+
+function getYoutubeIdFromUrl($url) {
+    $parts = parse_url($url);
+    if(isset($parts['query'])){
+        parse_str($parts['query'], $qs);
+        if(isset($qs['v'])){
+            return $qs['v'];
+        }else if(isset($qs['vi'])){
+            return $qs['vi'];
+        }
+    }
+    if(isset($parts['path'])){
+        $path = explode('/', trim($parts['path'], '/'));
+        return $path[count($path)-1];
+    }
+    return false;
+}
+
+
 include 'inc/gutenberg.php';
