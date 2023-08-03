@@ -37,10 +37,10 @@ function my_acf_init_block_types() {
             'post_types'        => array('page'),
         ));
         acf_register_block_type(array(
-            'name'              => 'my_publications',
-            'title'             => __('Publications (Custom)'),
-            'description'       => __('Add Publications'),
-            'render_template'   => 'parts/blocks/publications.php',
+            'name'              => 'my_publication',
+            'title'             => __('Publication (Custom)'),
+            'description'       => __('Add Publication'),
+            'render_template'   => 'parts/blocks/publication.php',
             'category'          => 'common',
             'post_types'        => array('page'),
         ));
@@ -139,6 +139,46 @@ function my_acf_init_block_types() {
             'render_template'   => 'parts/blocks/quote.php',
             'category'          => 'common',
             'post_types'        => array('page'),
+        ));
+        acf_register_block_type(array(
+            'name'              => 'my_contact',
+            'title'             => __('Contact (Custom)'),
+            'description'       => __('Add Contact'),
+            'render_template'   => 'parts/blocks/contact.php',
+            'category'          => 'common',
+            'post_types'        => array('page'),
+        ));
+        acf_register_block_type(array(
+            'name'              => 'my_workshops',
+            'title'             => __('Workshops (Custom)'),
+            'description'       => __('Add Workshops'),
+            'render_template'   => 'parts/blocks/workshops.php',
+            'category'          => 'common',
+            'post_types'        => array('page'),
+        ));
+        acf_register_block_type(array(
+            'name'              => 'my_last_project',
+            'title'             => __('Last project (Custom)'),
+            'description'       => __('Add Last project'),
+            'render_template'   => 'parts/blocks/last_project.php',
+            'category'          => 'common',
+            'post_types'        => array('page'),
+        ));
+        acf_register_block_type(array(
+            'name'              => 'my_projects',
+            'title'             => __('Projects (Custom)'),
+            'description'       => __('Add Projects'),
+            'render_template'   => 'parts/blocks/projects.php',
+            'category'          => 'common',
+            'post_types'        => array('page'),
+        ));
+        acf_register_block_type(array(
+            'name'              => 'my_content_resource',
+            'title'             => __('Content (Custom)'),
+            'description'       => __('Add Content'),
+            'render_template'   => 'parts/blocks/content_resource.php',
+            'category'          => 'common',
+            'post_types'        => array('resource'),
         ));
     }
 }

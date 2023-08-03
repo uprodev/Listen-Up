@@ -4,7 +4,7 @@
 
 add_action('wp_enqueue_scripts', 'load_style_script');
 function load_style_script(){
-	wp_enqueue_style('my-style', get_template_directory_uri() . '/css/style.min.css');
+	wp_enqueue_style('my-style', get_template_directory_uri() . '/css/style.min.css', array(), time());
 	wp_enqueue_style('my-style-main', get_template_directory_uri() . '/style.css');
 
 	wp_enqueue_script('jquery');
@@ -106,6 +106,9 @@ function getYoutubeIdFromUrl($url) {
     }
     return false;
 }
+
+
+add_post_type_support('page', 'excerpt');
 
 
 include 'inc/gutenberg.php';

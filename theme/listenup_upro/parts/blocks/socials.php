@@ -16,7 +16,7 @@
 
 							<?php if ($icon = get_sub_field('icon')): ?>
 								<li>
-									<a href="<?php the_sub_field('url') ?>" target="_blank">
+									<a href="<?= get_sub_field('url') ?>" target="_blank">
 										<?= wp_get_attachment_image($icon['ID'], 'full', false, array('class' => 'img-svg')) ?>
 									</a>
 								</li>

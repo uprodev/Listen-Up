@@ -37,6 +37,13 @@
     function addTouchClass() {
         if (isMobile.any()) document.documentElement.classList.add("touch");
     }
+    function functions_getHash() {
+        if (location.hash) return location.hash.replace("#", "");
+    }
+    function setHash(hash) {
+        hash = hash ? `#${hash}` : window.location.href.split("#")[0];
+        history.pushState("", "", hash);
+    }
     let _slideUp = (target, duration = 500, showmore = 0) => {
         if (!target.classList.contains("_slide")) {
             target.classList.add("_slide");
@@ -103,6 +110,9 @@
             }), duration);
         }
     };
+    let _slideToggle = (target, duration = 500) => {
+        if (target.hidden) return _slideDown(target, duration); else return _slideUp(target, duration);
+    };
     let bodyLockStatus = true;
     let bodyLockToggle = (delay = 500) => {
         if (document.documentElement.classList.contains("lock")) bodyUnlock(delay); else bodyLock(delay);
@@ -141,6 +151,202 @@
             }), delay);
         }
     };
+    function spollers() {
+        const spollersArray = document.querySelectorAll("[data-spollers]");
+        if (spollersArray.length > 0) {
+            document.addEventListener("click", setSpollerAction);
+            const spollersRegular = Array.from(spollersArray).filter((function(item, index, self) {
+                return !item.dataset.spollers.split(",")[0];
+            }));
+            if (spollersRegular.length) initSpollers(spollersRegular);
+            let mdQueriesArray = dataMediaQueries(spollersArray, "spollers");
+            if (mdQueriesArray && mdQueriesArray.length) mdQueriesArray.forEach((mdQueriesItem => {
+                mdQueriesItem.matchMedia.addEventListener("change", (function() {
+                    initSpollers(mdQueriesItem.itemsArray, mdQueriesItem.matchMedia);
+                }));
+                initSpollers(mdQueriesItem.itemsArray, mdQueriesItem.matchMedia);
+            }));
+            function initSpollers(spollersArray, matchMedia = false) {
+                spollersArray.forEach((spollersBlock => {
+                    spollersBlock = matchMedia ? spollersBlock.item : spollersBlock;
+                    if (matchMedia.matches || !matchMedia) {
+                        spollersBlock.classList.add("_spoller-init");
+                        initSpollerBody(spollersBlock);
+                    } else {
+                        spollersBlock.classList.remove("_spoller-init");
+                        initSpollerBody(spollersBlock, false);
+                    }
+                }));
+            }
+            function initSpollerBody(spollersBlock, hideSpollerBody = true) {
+                let spollerItems = spollersBlock.querySelectorAll("details");
+                if (spollerItems.length) {
+                    spollerItems = Array.from(spollerItems).filter((item => item.closest("[data-spollers]") === spollersBlock));
+                    spollerItems.forEach((spollerItem => {
+                        let spollerTitle = spollerItem.querySelector("summary");
+                        if (hideSpollerBody) {
+                            spollerTitle.removeAttribute("tabindex");
+                            if (!spollerItem.hasAttribute("data-open")) {
+                                spollerItem.open = false;
+                                spollerTitle.nextElementSibling.hidden = true;
+                            } else {
+                                spollerTitle.classList.add("_spoller-active");
+                                spollerItem.open = true;
+                            }
+                        } else {
+                            spollerTitle.setAttribute("tabindex", "-1");
+                            spollerTitle.classList.remove("_spoller-active");
+                            spollerItem.open = true;
+                            spollerTitle.nextElementSibling.hidden = false;
+                        }
+                    }));
+                }
+            }
+            function setSpollerAction(e) {
+                const el = e.target;
+                if (el.closest("summary") && el.closest("[data-spollers]").classList.contains("_spoller-init")) {
+                    const spollerTitle = el.closest("summary");
+                    const spollerBlock = spollerTitle.closest("details");
+                    const spollersBlock = spollerTitle.closest("[data-spollers]");
+                    const oneSpoller = spollersBlock.hasAttribute("data-one-spoller");
+                    const spollerSpeed = spollersBlock.dataset.spollersSpeed ? parseInt(spollersBlock.dataset.spollersSpeed) : 500;
+                    if (!spollersBlock.querySelectorAll("._slide").length) {
+                        if (oneSpoller && !spollerBlock.open) hideSpollersBody(spollersBlock);
+                        !spollerBlock.open ? spollerBlock.open = true : setTimeout((() => {
+                            spollerBlock.open = false;
+                        }), spollerSpeed);
+                        spollerTitle.classList.toggle("_spoller-active");
+                        _slideToggle(spollerTitle.nextElementSibling, spollerSpeed);
+                    }
+                    e.preventDefault();
+                }
+                if (!el.closest("[data-spollers]")) {
+                    const spollersClose = document.querySelectorAll("[data-spoller-close]");
+                    if (spollersClose.length) spollersClose.forEach((spollerClose => {
+                        const spollersBlock = spollerClose.closest("[data-spollers]");
+                        const spollerCloseBlock = spollerClose.parentNode;
+                        if (spollersBlock.classList.contains("_spoller-init")) {
+                            const spollerSpeed = spollersBlock.dataset.spollersSpeed ? parseInt(spollersBlock.dataset.spollersSpeed) : 500;
+                            spollerClose.classList.remove("_spoller-active");
+                            _slideUp(spollerClose.nextElementSibling, spollerSpeed);
+                            setTimeout((() => {
+                                spollerCloseBlock.open = false;
+                            }), spollerSpeed);
+                        }
+                    }));
+                }
+            }
+            function hideSpollersBody(spollersBlock) {
+                const spollerActiveBlock = spollersBlock.querySelector("details[open]");
+                if (spollerActiveBlock && !spollersBlock.querySelectorAll("._slide").length) {
+                    const spollerActiveTitle = spollerActiveBlock.querySelector("summary");
+                    const spollerSpeed = spollersBlock.dataset.spollersSpeed ? parseInt(spollersBlock.dataset.spollersSpeed) : 500;
+                    spollerActiveTitle.classList.remove("_spoller-active");
+                    _slideUp(spollerActiveTitle.nextElementSibling, spollerSpeed);
+                    setTimeout((() => {
+                        spollerActiveBlock.open = false;
+                    }), spollerSpeed);
+                }
+            }
+        }
+    }
+    function tabs() {
+        const tabs = document.querySelectorAll("[data-tabs]");
+        let tabsActiveHash = [];
+        if (tabs.length > 0) {
+            const hash = functions_getHash();
+            if (hash && hash.startsWith("tab-")) tabsActiveHash = hash.replace("tab-", "").split("-");
+            tabs.forEach(((tabsBlock, index) => {
+                tabsBlock.classList.add("_tab-init");
+                tabsBlock.setAttribute("data-tabs-index", index);
+                tabsBlock.addEventListener("click", setTabsAction);
+                initTabs(tabsBlock);
+            }));
+            let mdQueriesArray = dataMediaQueries(tabs, "tabs");
+            if (mdQueriesArray && mdQueriesArray.length) mdQueriesArray.forEach((mdQueriesItem => {
+                mdQueriesItem.matchMedia.addEventListener("change", (function() {
+                    setTitlePosition(mdQueriesItem.itemsArray, mdQueriesItem.matchMedia);
+                }));
+                setTitlePosition(mdQueriesItem.itemsArray, mdQueriesItem.matchMedia);
+            }));
+        }
+        function setTitlePosition(tabsMediaArray, matchMedia) {
+            tabsMediaArray.forEach((tabsMediaItem => {
+                tabsMediaItem = tabsMediaItem.item;
+                let tabsTitles = tabsMediaItem.querySelector("[data-tabs-titles]");
+                let tabsTitleItems = tabsMediaItem.querySelectorAll("[data-tabs-title]");
+                let tabsContent = tabsMediaItem.querySelector("[data-tabs-body]");
+                let tabsContentItems = tabsMediaItem.querySelectorAll("[data-tabs-item]");
+                tabsTitleItems = Array.from(tabsTitleItems).filter((item => item.closest("[data-tabs]") === tabsMediaItem));
+                tabsContentItems = Array.from(tabsContentItems).filter((item => item.closest("[data-tabs]") === tabsMediaItem));
+                tabsContentItems.forEach(((tabsContentItem, index) => {
+                    if (matchMedia.matches) {
+                        tabsContent.append(tabsTitleItems[index]);
+                        tabsContent.append(tabsContentItem);
+                        tabsMediaItem.classList.add("_tab-spoller");
+                    } else {
+                        tabsTitles.append(tabsTitleItems[index]);
+                        tabsMediaItem.classList.remove("_tab-spoller");
+                    }
+                }));
+            }));
+        }
+        function initTabs(tabsBlock) {
+            let tabsTitles = tabsBlock.querySelectorAll("[data-tabs-titles]>*");
+            let tabsContent = tabsBlock.querySelectorAll("[data-tabs-body]>*");
+            const tabsBlockIndex = tabsBlock.dataset.tabsIndex;
+            const tabsActiveHashBlock = tabsActiveHash[0] == tabsBlockIndex;
+            if (tabsActiveHashBlock) {
+                const tabsActiveTitle = tabsBlock.querySelector("[data-tabs-titles]>._tab-active");
+                tabsActiveTitle ? tabsActiveTitle.classList.remove("_tab-active") : null;
+            }
+            if (tabsContent.length) {
+                tabsContent = Array.from(tabsContent).filter((item => item.closest("[data-tabs]") === tabsBlock));
+                tabsTitles = Array.from(tabsTitles).filter((item => item.closest("[data-tabs]") === tabsBlock));
+                tabsContent.forEach(((tabsContentItem, index) => {
+                    tabsTitles[index].setAttribute("data-tabs-title", "");
+                    tabsContentItem.setAttribute("data-tabs-item", "");
+                    if (tabsActiveHashBlock && index == tabsActiveHash[1]) tabsTitles[index].classList.add("_tab-active");
+                    tabsContentItem.hidden = !tabsTitles[index].classList.contains("_tab-active");
+                }));
+            }
+        }
+        function setTabsStatus(tabsBlock) {
+            let tabsTitles = tabsBlock.querySelectorAll("[data-tabs-title]");
+            let tabsContent = tabsBlock.querySelectorAll("[data-tabs-item]");
+            const tabsBlockIndex = tabsBlock.dataset.tabsIndex;
+            function isTabsAnamate(tabsBlock) {
+                if (tabsBlock.hasAttribute("data-tabs-animate")) return tabsBlock.dataset.tabsAnimate > 0 ? Number(tabsBlock.dataset.tabsAnimate) : 500;
+            }
+            const tabsBlockAnimate = isTabsAnamate(tabsBlock);
+            if (tabsContent.length > 0) {
+                const isHash = tabsBlock.hasAttribute("data-tabs-hash");
+                tabsContent = Array.from(tabsContent).filter((item => item.closest("[data-tabs]") === tabsBlock));
+                tabsTitles = Array.from(tabsTitles).filter((item => item.closest("[data-tabs]") === tabsBlock));
+                tabsContent.forEach(((tabsContentItem, index) => {
+                    if (tabsTitles[index].classList.contains("_tab-active")) {
+                        if (tabsBlockAnimate) _slideDown(tabsContentItem, tabsBlockAnimate); else tabsContentItem.hidden = false;
+                        if (isHash && !tabsContentItem.closest(".popup")) setHash(`tab-${tabsBlockIndex}-${index}`);
+                    } else if (tabsBlockAnimate) _slideUp(tabsContentItem, tabsBlockAnimate); else tabsContentItem.hidden = true;
+                }));
+            }
+        }
+        function setTabsAction(e) {
+            const el = e.target;
+            if (el.closest("[data-tabs-title]")) {
+                const tabTitle = el.closest("[data-tabs-title]");
+                const tabsBlock = tabTitle.closest("[data-tabs]");
+                if (!tabTitle.classList.contains("_tab-active") && !tabsBlock.querySelector("._slide")) {
+                    let tabActiveTitle = tabsBlock.querySelectorAll("[data-tabs-title]._tab-active");
+                    tabActiveTitle.length ? tabActiveTitle = Array.from(tabActiveTitle).filter((item => item.closest("[data-tabs]") === tabsBlock)) : null;
+                    tabActiveTitle.length ? tabActiveTitle[0].classList.remove("_tab-active") : null;
+                    tabTitle.classList.add("_tab-active");
+                    setTabsStatus(tabsBlock);
+                }
+                e.preventDefault();
+            }
+        }
+    }
     function menuInit() {
         if (document.querySelector(".icon-menu")) document.addEventListener("click", (function(e) {
             if (bodyLockStatus && e.target.closest(".icon-menu")) {
@@ -3539,42 +3745,73 @@
         });
     }
     function initSliders() {
-        if (document.querySelector(".swiper")) new core(".testimonials__slider", {
-            modules: [ Pagination ],
-            observer: true,
-            observeParents: true,
-            centeredSlides: true,
-            speed: 800,
-            initialSlide: 1,
-            pagination: {
-                el: ".testimonials .swiper-pagination",
-                clickable: true,
-                dynamicBullets: true
-            },
-            breakpoints: {
-                320: {
-                    slidesPerView: 1.2,
-                    spaceBetween: 10
+        if (document.querySelector(".swiper")) {
+            new core(".testimonials__slider", {
+                modules: [ Pagination ],
+                observer: true,
+                observeParents: true,
+                centeredSlides: true,
+                speed: 800,
+                initialSlide: 1,
+                pagination: {
+                    el: ".testimonials .swiper-pagination",
+                    clickable: true,
+                    dynamicBullets: true
                 },
-                640: {
-                    slidesPerView: 1.5,
-                    spaceBetween: 20
+                breakpoints: {
+                    320: {
+                        slidesPerView: 1.2,
+                        spaceBetween: 10
+                    },
+                    640: {
+                        slidesPerView: 1.5,
+                        spaceBetween: 20
+                    },
+                    768: {
+                        slidesPerView: 2,
+                        spaceBetween: 20
+                    },
+                    1440: {
+                        slidesPerView: 2,
+                        spaceBetween: 32
+                    },
+                    1920: {
+                        slidesPerView: 3.2,
+                        spaceBetween: 32
+                    }
                 },
-                768: {
-                    slidesPerView: 2,
-                    spaceBetween: 20
+                on: {}
+            });
+            new core(".partners__slider", {
+                modules: [ Pagination ],
+                observer: true,
+                observeParents: true,
+                speed: 800,
+                breakpoints: {
+                    320: {
+                        slidesPerView: 1.2,
+                        spaceBetween: 10
+                    },
+                    640: {
+                        slidesPerView: 1.5,
+                        spaceBetween: 20
+                    },
+                    768: {
+                        slidesPerView: 2,
+                        spaceBetween: 20
+                    },
+                    1440: {
+                        slidesPerView: 2,
+                        spaceBetween: 32
+                    },
+                    1920: {
+                        slidesPerView: 4,
+                        spaceBetween: 20
+                    }
                 },
-                1440: {
-                    slidesPerView: 2,
-                    spaceBetween: 32
-                },
-                1920: {
-                    slidesPerView: 3.2,
-                    spaceBetween: 32
-                }
-            },
-            on: {}
-        });
+                on: {}
+            });
+        }
     }
     window.addEventListener("load", (function(e) {
         initSliders();
@@ -3605,5 +3842,7 @@
     isWebp();
     addTouchClass();
     menuInit();
+    spollers();
+    tabs();
     showMore();
 })();

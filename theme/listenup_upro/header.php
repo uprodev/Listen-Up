@@ -17,9 +17,7 @@
 
           <?php if ($field = get_field('logo_header', 'option')): ?>
             <a href="<?= get_home_url() ?>" class="header__logo">
-              <picture>
-                <?= wp_get_attachment_image($field['ID'], 'full') ?>
-              </picture>
+              <?= wp_get_attachment_image($field['ID'], 'full') ?>
             </a>
           <?php endif ?>
           

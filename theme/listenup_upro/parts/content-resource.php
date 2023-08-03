@@ -1,7 +1,7 @@
 <?php $term = wp_get_object_terms(get_the_ID(), 'resource_cat')[0] ?>
 
 <article>
-	<a href="<?php the_permalink() ?>" class="item item--video">
+	<a href="<?php the_permalink() ?>" class="item">
 		<div class="item__body">
 			<div class="item__header">
 

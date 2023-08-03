@@ -1,6 +1,4 @@
-<?php if (get_field('video')): ?>
-
-	<?php preg_match('/src="(.+?)"/', get_field('video'), $matches) ?>
+<?php if ($video = get_field('video')): ?>
 	
 	<section class="about-video section-padding">
 		<div class="about-video__container">
@@ -10,7 +8,7 @@
 					<div class="about-video__text"><?= $field ?></div>
 				<?php endif ?>
 
-				<div class="about-video__video" data-popup="#popupVideoAbout" data-popup-youtube="<?= getYoutubeIdFromUrl($matches[1]) ?>">
+				<div class="about-video__video" data-popup="#popupVideoAbout">
 
 					<?php if ($field = get_field('preview')): ?>
 						<div class="preview">
@@ -43,13 +41,16 @@
 		</div>
 	</section>
 
-	<div id="popupVideoAbout" aria-hidden="true" class="popup-video">
+	<div id="popupVideoAbout" aria-hidden="true" class="popup-video popup">
 		<div class="popup__wrapper">
 			<div class="popup__content">
 				<button data-close type="button" class="popup__close"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24px" height="24px">
 					<path d="M 4.9902344 3.9902344 A 1.0001 1.0001 0 0 0 4.2929688 5.7070312 L 10.585938 12 L 4.2929688 18.292969 A 1.0001 1.0001 0 1 0 5.7070312 19.707031 L 12 13.414062 L 18.292969 19.707031 A 1.0001 1.0001 0 1 0 19.707031 18.292969 L 13.414062 12 L 19.707031 5.7070312 A 1.0001 1.0001 0 0 0 18.980469 3.9902344 A 1.0001 1.0001 0 0 0 18.292969 4.2929688 L 12 10.585938 L 5.7070312 4.2929688 A 1.0001 1.0001 0 0 0 4.9902344 3.9902344 z" />
 				</svg></button>
-				<div data-youtube-place class="popup__text">
+				<div class="popup__text">
+					<video width="400" height="300" controls="controls"><source src="<?= $video['url'] ?>" ttype='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'>
+						The video tag is not supported by your browser. 
+					</video>
 				</div>
 			</div>
 		</div>
